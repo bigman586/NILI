@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Plug</string>
+    <!-- Strings related to labeling -->
+    <string name="question">What device did you plug into the outlet?</string>
+    <string name="label">enter your device name</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="error_no_send">Unable to send label to server</string>
+    <string name="error_no_connection">Unable to connect to server</string>
+    <string name="error_wrong_label">Enter a valid name </string>
+</resources>

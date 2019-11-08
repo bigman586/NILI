@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient">
+
+    <TextView
+        android:id="@+id/prediction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/lato_black"
+        android:layout_marginBottom="@dimen/activity_vertical_margin"
+        android:layout_marginTop="20dp"
+        android:text="Mainstays LED Desk Lamp"
+        android:textAlignment="center"
+        android:textAllCaps="false"
+        android:textColor="#fff"
+        android:textSize="@dimen/large_text_size"
+        android:textStyle="bold"
+        tools:targetApi="lollipop" />
+
+</LinearLayout>
