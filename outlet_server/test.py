@@ -12,18 +12,6 @@ from sklearn import preprocessing
 import main
 
 
-def getFeatures():
-    features = []
-
-    db_setup.initDB()
-    db_setup.cursor.execute("SHOW columns FROM outlet_data.data")
-    for column in db_setup.cursor.fetchall():
-        if (column[0] != 'id'):
-            features.append(column[0])
-
-    db_setup.closeDB()
-    return features
-
 db_setup.initDB()
 
 pd.set_option('display.max_columns', 20)
@@ -32,38 +20,26 @@ pd.set_option('expand_frame_repr', True)
 db_setup.cursor.execute("SELECT * FROM outlet_data.data")
 df = pd.read_sql("SELECT * FROM outlet_data.data", con=db_setup.db)
 
-print(df.columns)
-
-XFeatures = getFeatures()[1:]
-YFeatures = getFeatures()[0:1]
-
-print(XFeatures)
+#print(df.columns)
 
 X = df.drop(['id', 'label'], axis=1)
 Y = df['label']
 
-numeric_features = X.columns
-numeric_transformer = Pipeline(steps=[
-    ('imputer', SimpleImputer(strategy='median')),
-    ('scaler', StandardScaler())])
+categoricals = []  # going to one-hot encode categorical variables
 
-categorical_features = Y.columns
-categorical_transformer = Pipeline(steps=[
-    ('imputer', SimpleImputer(strategy='constant', fill_value='missing')),
-    ('onehot', OneHotEncoder(handle_unknown='ignore'))])
+for col, col_type in df.dtypes.items():
+    if col_type == 'O':
+        categoricals.append(col)
+    else:
+        df[col].fillna(0, inplace=True)  # fill NA's with 0 for ints/floats, too generic
 
-preprocessor = ColumnTransformer(
-    transformers=[
-        ('num', numeric_transformer, numeric_features),
-        ('cat', categorical_transformer, categorical_features)])
+# get_dummies effectively creates one-hot encoded variables
+Y = pd.get_dummies(Y, columns=categoricals, dummy_na=True)
 
-clf = Pipeline(steps=[('preprocessor', preprocessor),
-                      ('classifier', DecisionTreeClassifier())])
+knn = KNeighborsClassifier()
+start = time.time()
 
-X = df.drop(['id', 'label'], axis=1)
-Y = df['label']
-
-clf.fit(X, Y)
+knn.fit(X, Y)
 
 
 '''dt = DecisionTreeClassifier()
@@ -71,3 +47,5 @@ knn = KNeighborsClassifier()
 
 dt.fit(X, Y)
 knn.fit(X, Y)'''
+
+print("Trained in " + str(time.time()-start) + " seconds")

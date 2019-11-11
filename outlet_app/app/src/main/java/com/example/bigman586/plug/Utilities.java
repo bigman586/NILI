@@ -8,6 +8,11 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 public final class Utilities {
+
+    /**
+     * Rounds double value to number specified
+     * @return rounded double
+     */
     public static double round(double value, int places) {
         if (places < 0) throw new IllegalArgumentException();
 
@@ -16,6 +21,9 @@ public final class Utilities {
         return bd.doubleValue();
     }
 
+    /**
+     * Creates toast with message specified
+     */
     public static void errorToast(String message, Context context){
         Toast.makeText(context,
                 message, Toast.LENGTH_SHORT).show();
@@ -23,7 +31,6 @@ public final class Utilities {
 
     /**
      * Check if entry from textfield is valid
-     *
      * @return boolean value
      */
     public static boolean isTextValid(String entry){
@@ -39,6 +46,4 @@ public final class Utilities {
 
         return true;
     }
-
-
 }

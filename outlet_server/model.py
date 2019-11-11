@@ -6,6 +6,7 @@ from sklearn.tree import DecisionTreeClassifier
 import numpy as np
 from sklearn.externals import joblib
 from sklearn.neighbors import KNeighborsClassifier
+import time
 
 pd.set_option('display.max_columns', 20)
 pd.set_option('expand_frame_repr', True)
@@ -20,22 +21,34 @@ def train():
     db_setup.initDB()
 
     # select all data from database
-    db_setup.cursor.execute("SELECT * FROM outlet_data.data")
-    df = pd.read_sql("SELECT * FROM outlet_data.data", con=db_setup.db)
+    db_setup.cursor.execute(db_setup.statement)
+    df = pd.read_sql(db_setup.statement, con=db_setup.db)
 
     db_setup.closeDB()
 
     X = df.drop(['id', 'label'], axis=1)
     Y = df['label']
 
-    # one-hot encoding
-    Y = pd.get_dummies(Y)
+    # categorical variables
+    categoricals = []
 
-    dt = DecisionTreeClassifier()
+    for col, col_type in df.dtypes.items():
+        if col_type == 'O':
+            categoricals.append(col)
+        else:
+            df[col].fillna(0, inplace=True)  # fill NA's with 0 for ints/floats, too generic
+
+    # one-hot encoding
+    Y = pd.get_dummies(Y, columns=categoricals, dummy_na=True)
+
     knn = KNeighborsClassifier()
+
+    start = time.time()
 
     dt.fit(X, Y)
     knn.fit(X, Y)
+
+    print("Trained in " + str(time.time() - start) + " seconds")
 
 
 def predict():
@@ -50,8 +63,15 @@ def loadModels():
     global dt
     global knn
 
-    dt = joblib.load(modelNames[0])
-    knn = joblib.load(modelNames[1])
+    try:
+        dt = joblib.load(modelNames[0])
+        knn = joblib.load(modelNames[1])
+        print('Model loaded')
+
+    except Exception as e:
+        print('No model here')
+        print(str(e))
+        return
 
 
 def saveModels():
