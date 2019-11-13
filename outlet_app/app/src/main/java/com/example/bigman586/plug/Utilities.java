@@ -1,11 +1,16 @@
 package com.example.bigman586.plug;
 
+import android.app.Activity;
 import android.content.Context;
+import android.inputmethodservice.InputMethodService;
 import android.text.TextUtils;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+
+import static android.support.v4.content.ContextCompat.getSystemService;
 
 public final class Utilities {
 
@@ -40,10 +45,21 @@ public final class Utilities {
         if (TextUtils.isDigitsOnly(entry)){
             return false;
         }
-        if (entry.trim().matches("")){
-            return false;
-        }
+        return !entry.trim().matches("");
+    }
 
-        return true;
+
+    /**
+     * Closes software keyboard
+     */
+    public static void hideKeyboard(Context context, Activity activity) {
+        View view = activity.getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) context.getSystemService(Activity.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
+
+    public static void hideKeyboard(Context applicationContext) {
     }
 }

@@ -105,7 +105,7 @@ public class LabelActivity extends AppCompatActivity{
             @Override
             public void onClick(View view) {
                 submitLabel();
-                hideKeyboard();
+                Utilities.hideKeyboard(LabelActivity.this.getApplicationContext(), LabelActivity.this);
                 labelField.setText("");
             }
         });
@@ -199,7 +199,6 @@ public class LabelActivity extends AppCompatActivity{
             }
 
         });
-
     }
 
     /**
@@ -355,19 +354,4 @@ public class LabelActivity extends AppCompatActivity{
     /**
      * Closes software keyboard
      */
-    public void hideKeyboard() {
-        View view = this.getCurrentFocus();
-        if (view != null) {
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-        }
-    }
-
-
-
-
 }
-
-
-
-
