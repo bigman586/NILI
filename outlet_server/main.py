@@ -1,17 +1,17 @@
 from flask import Flask, request, jsonify, json, render_template
 import db_setup
-
-db_setup.initDB()
 import numpy as np
 from scipy import stats
 
 app = Flask(__name__)
+db_setup.initDB()
 # socketio = SocketIO(app)
 
 currentLabel = ""
 switchOn = False
 minCurrent = 10 ** 5
 currentMean = 0
+sampling = []
 
 tableName = db_setup.tableName
 statement = db_setup.statement
@@ -71,31 +71,26 @@ def postCommmand():
     return str(switchOn)
 
 
-# POST REQUEST
-@app.route('/postData', methods=['POST'])
-def getData():
-    """
-    retrieves data from server
-    """
+def processData(current):
+    '''
+    inserts data to table
+
+    :param current: float of current value
+    :return:
+    '''
     global minCurrent
     global switchOn
-    global currentMean
-
-    sampling = []
-    # oconverts byte literal to string
-    current = request.get_data().decode("utf-8")
+    global sampling
 
     interval = 10
 
-    while (len(sampling) <= interval):
+    if (len(sampling) < interval):
         sampling.append(current)
-
-    if sampling:
-        # converts string array to float array
+        print(current)
+    else:
+        print(sampling)
         sampling = np.array(sampling)
         sampling = sampling.astype(float)
-
-        currentMean = np.mean(sampling)
 
         if currentLabel != "":
             insertData(sampling)
@@ -104,16 +99,25 @@ def getData():
             if current < minCurrent:
                 minCurrent = current
                 # switchOn = not switchOn
+        sampling = []
+        return ("Saved Sampling")
 
-        print(sampling)
-    else:
-        return ("null")
 
-    # resets sampling
-    sampling = []
+# POST REQUEST
+@app.route('/postData', methods=['POST'])
+def getData():
+    """
+    retrieves data from server
+    """
+    global currentMean
 
-    # TODO add reference to train function
-    return ("Saved Sampling")
+    # converts byte literal to string and processes it
+    current = request.get_data().decode("utf-8")
+    if current:
+        processData(current)
+        currentMean = current
+
+    return("Data Posted")
 
 
 '''return jsonify({"prediction": list(map(int, prediction))})'''
@@ -125,24 +129,7 @@ def getAllLabels():
     """
     :return: all unique labels as an array
     """
-    db_setup.initDB()
-    db_setup.cursor.execute(statement)
-
-    datasets = db_setup.cursor.fetchall()
-    allLabels = []
-
-    for dataset in datasets:
-        allLabels.append(dataset[1])
-
-    unique = []
-
-    for label in allLabels:
-        if label not in unique:
-            unique.append(label)
-
-    allLabels = unique
-    # allLabels.sort()
-
+    allLabels = db_setup.allLabels()
     allLabels = json.dumps(allLabels)
 
     print(allLabels)
@@ -181,6 +168,7 @@ def insertData(sampling):
     global currentMean
     db_setup.initDB()
 
+    mean = np.mean(sampling)
     median = np.median(sampling)
     sd = np.std(sampling)
     variance = np.var(sampling)
@@ -192,7 +180,7 @@ def insertData(sampling):
     request = "INSERT INTO {0} (label, mean, median, sd, variance, iqr, mode, min, max) " \
               "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)".format(db_setup.tableName)
     values = (
-    currentLabel, float(currentMean), float(median), float(sd), float(variance), float(iqr), float(mode), float(min),
+    currentLabel, float(mean), float(median), float(sd), float(variance), float(iqr), float(mode), float(min),
     float(max))
 
     print(currentLabel)

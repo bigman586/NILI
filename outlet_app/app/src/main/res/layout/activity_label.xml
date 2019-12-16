@@ -1,58 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#ffffff"
-    android:orientation="vertical"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context=".LabelActivity">
+    android:layout_height="match_parent">
 
+    <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:orientation="vertical"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/question"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/activity_vertical_margin"
-        android:layout_marginTop="7.5dp"
-        android:fontFamily="@font/lato_black"
-        android:gravity="left"
-        android:text="@string/question"
-        android:textAlignment="textStart"
-        android:textAllCaps="false"
-        android:textColor="#000"
-        android:textSize="@dimen/large_text_size"
-        android:textStyle="bold"
-        tools:targetApi="lollipop" />
+        <TextView
+            android:id="@+id/question"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="22.5dp"
+            android:fontFamily="@font/lato_black"
+            android:gravity="left"
+            android:text="@string/question"
+            android:textAlignment="center"
+            android:textAllCaps="false"
+            android:textColor="#000"
+            android:textSize="@dimen/large_text_size"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@+id/frameLayout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:targetApi="lollipop" />
 
-    <FrameLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp">
+        <FrameLayout
+            android:id="@+id/frameLayout"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_marginBottom="2dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginStart="4dp"
+            app:layout_constraintBottom_toTopOf="@+id/currentDevice"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/question">
 
-        <EditText
-            android:id="@+id/placeHolder"
-            android:layout_width="5dp"
-            android:layout_height="7dp"
-            android:layout_gravity="center_vertical"></EditText>
+            <EditText
+                android:id="@+id/placeHolder"
+                android:layout_width="5dp"
+                android:layout_height="7dp"
+                android:layout_gravity="center_vertical" />
 
             <AutoCompleteTextView
                 android:id="@+id/labelField"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:background="@drawable/textfield_background"
                 android:hint="@string/label"
                 android:inputType="textAutoComplete"
                 android:maxLines="1"
-                android:singleLine="true"
                 android:paddingLeft="20dp"
-                android:background="@drawable/textfield_background"
-                android:layout_gravity="left"
-                />
+                android:singleLine="true" />
 
-             <ImageButton
+            <ImageButton
                 android:id="@+id/send"
                 style="?android:attr/borderlessButtonStyle"
                 android:layout_width="wrap_content"
@@ -62,99 +75,30 @@
                 android:gravity="center"
                 android:src="@drawable/enter_btn"
                 android:textAlignment="center"
-                android:textColor="#fff" />
-
-
-    </FrameLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/currentMean"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginBottom="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_weight="1"
-            android:fontFamily="@font/hammersmith_one"
-            android:text="TextView"
-            android:textAlignment="center"
-            android:textColor="#2d2d2d"
-            android:textSize="15sp"
-            android:textStyle="bold" />
+                android:textColor="#fff"
+                android:onClick="submitLabel"/>
+        </FrameLayout>
 
         <TextView
             android:id="@+id/currentDevice"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:layout_marginTop="10dp"
+            android:layout_height="29dp"
+            android:layout_gravity="center"
+            android:layout_marginBottom="15dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="15dp"
+            android:layout_weight="1"
             android:fontFamily="sans-serif-smallcaps"
             android:text="TextView"
             android:textAlignment="center"
             android:textColor="#666666"
-            android:textSize="15sp"
-            android:textStyle="bold"
-            android:layout_gravity="center"
-            android:layout_weight="1"/>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/offText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_weight="1"
-            android:text="OFF"
-            android:textAlignment="center"
             android:textSize="17.5sp"
             android:textStyle="bold"
-            android:textColor="#000"/>
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/frameLayout" />
 
-        <Switch
-            android:id="@+id/toggle"
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:layout_gravity="center_vertical"
-            android:layout_margin="1dp"
-            android:checked="false"
-            android:gravity="center_vertical"
-            android:orientation="vertical"
-            android:rotation="0"
-            android:switchMinWidth="56dp"
-            android:thumb="@drawable/switch_thumb"
-            android:track="@drawable/switch_track" />
-
-        <TextView
-            android:id="@+id/onText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_weight="1"
-            android:text="ON"
-            android:textAlignment="center"
-            android:textSize="17.5sp"
-        />
-    </LinearLayout>
-
-    <com.jjoe64.graphview.GraphView
-        android:id="@+id/graph"
-        android:layout_width="match_parent"
-        android:layout_height="275dp"
-        android:layout_marginTop="15dp"
-        android:layout_marginLeft="0dp"
-        android:paddingLeft="0dp"
-        android:layout_marginRight="0dp"
-        android:paddingRight="0dp"/>
-
-</LinearLayout>
+    </android.support.constraint.ConstraintLayout>
+</ScrollView>

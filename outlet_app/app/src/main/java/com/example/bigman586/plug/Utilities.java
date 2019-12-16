@@ -48,7 +48,6 @@ public final class Utilities {
         return !entry.trim().matches("");
     }
 
-
     /**
      * Closes software keyboard
      */
@@ -58,8 +57,5 @@ public final class Utilities {
             InputMethodManager imm = (InputMethodManager) context.getSystemService(Activity.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
-    }
-
-    public static void hideKeyboard(Context applicationContext) {
     }
 }

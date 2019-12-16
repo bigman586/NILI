@@ -1,3 +1,5 @@
+import numpy as np
+
 import mysql.connector as mysql
 
 db = None
@@ -26,3 +28,17 @@ def closeDB():
     db.close()
     cursor.close()
 
+def allLabels():
+    initDB()
+    cursor.execute("SELECT DISTINCT label FROM %s" % tableName)
+
+    columns = np.asarray(cursor.fetchall())
+    labels = []
+
+    for name in columns:
+        labels.append(name[0])
+
+    labels.sort()
+
+    closeDB()
+    return labels
