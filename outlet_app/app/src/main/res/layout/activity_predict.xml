@@ -20,7 +20,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:fontFamily="@font/lato_black"
-        android:text="Mainstays LED Desk Lamp"
+        android:text="Device"
         android:textAlignment="center"
         android:textAllCaps="false"
         android:textColor="#fff"

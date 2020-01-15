@@ -5,12 +5,13 @@ import mysql.connector as mysql
 db = None
 cursor = None
 
-DBName = "outlet_data"
-tableName = "%s.data" % DBName
-statement = "SELECT * FROM %s" % tableName
+db_name = "outlet_data"
+table_name = "%s.data" % db_name
+statement = "SELECT * FROM %s" % table_name
 
-#initialize database and cursor
-def initDB():
+
+# initialize database and cursor
+def init_db():
     global db
     global cursor
 
@@ -18,19 +19,28 @@ def initDB():
         host="localhost",
         user="root",
         passwd="Computer468",
-        database=DBName
+        database=db_name
     )
 
     cursor = db.cursor(buffered=True)
 
-#closes database and cursor
-def closeDB():
-    db.close()
-    cursor.close()
 
-def allLabels():
-    initDB()
-    cursor.execute("SELECT DISTINCT label FROM %s" % tableName)
+# closes database and cursor
+def close_db():
+    global cursor
+    global db
+
+    cursor.close()
+    db.close()
+
+    db = None
+    cursor = None
+
+
+def all_labels():
+
+    init_db()
+    cursor.execute("SELECT DISTINCT label FROM %s" % table_name)
 
     columns = np.asarray(cursor.fetchall())
     labels = []
@@ -40,5 +50,5 @@ def allLabels():
 
     labels.sort()
 
-    closeDB()
+    close_db()
     return labels

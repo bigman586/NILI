@@ -1,39 +1,43 @@
 from flask import Flask, request, jsonify, json, render_template
 import db_setup
+import model
 import numpy as np
+import pandas as pd
 from scipy import stats
 
 app = Flask(__name__)
-db_setup.initDB()
-# socketio = SocketIO(app)
+db_setup.init_db()
 
-currentLabel = ""
-switchOn = False
-minCurrent = 10 ** 5
-currentMean = 0
+sample_label = ""
+state = False
+current_mean = 0
+
 sampling = []
+columns = model.get_columns()
+test_data = pd.DataFrame(columns=columns)
 
-tableName = db_setup.tableName
+table_name = db_setup.table_name
 statement = db_setup.statement
+
 
 @app.route("/")
 def home():
     """
     root directory of  server
     """
-    return render_template('index.html', current=currentMean, label=currentLabel, status=switchOn)
+    return render_template('index.html', current=current_mean, label=sample_label, status=state)
 
 
 @app.route('/getMean')
 def getMean():
-    global currentMean
-    return str(currentMean)
+    global current_mean
+    return str(current_mean)
 
 
 @app.route('/getLabel')
 def getLabel():
-    global currentLabel
-    return str(currentLabel)
+    global sample_label
+    return str(sample_label)
 
 
 @app.route('/getStatus')
@@ -41,11 +45,11 @@ def getStatus():
     """
     :return: status of device connected to outlet
     """
-    global switchOn
+    global state
 
-    if switchOn:
+    if state:
         return 'on'
-    elif not switchOn:
+    elif not state:
         return 'off'
 
 
@@ -54,53 +58,71 @@ def postCommmand():
     """
     changes status of outlet based on info. from app
     """
-    global switchOn
+    global state
 
-    commandJSON = request.get_json()
-    commandString = str(commandJSON["command"])
+    command_json = request.get_json()
+    command_string = str(command_json["command"])
 
-    if (len(commandString) == 0):
+    if (len(command_string) == 0):
         return jsonify({"error': 'invalid input"})
 
-    if commandString == 'on':
-        switchOn = True
-    if commandString == 'off':
-        switchOn = False
+    if command_string == 'on':
+        state = True
+    if command_string == 'off':
+        state = False
 
-    print(str(switchOn))
-    return str(switchOn)
+    print(str(state))
+    return str(state)
 
 
-def processData(current):
-    '''
+def process_data(current):
+    """
     inserts data to table
 
     :param current: float of current value
     :return:
-    '''
-    global minCurrent
-    global switchOn
+    """
     global sampling
 
     interval = 10
 
     if (len(sampling) < interval):
         sampling.append(current)
-        print(current)
+        # print(current)
     else:
         print(sampling)
         sampling = np.array(sampling)
         sampling = sampling.astype(float)
 
-        if currentLabel != "":
-            insertData(sampling)
-
-        for current in sampling:
-            if current < minCurrent:
-                minCurrent = current
-                # switchOn = not switchOn
-        sampling = []
+        process_sample()
         return ("Saved Sampling")
+
+
+@app.route('/getPrediction')
+def getPrediction():
+    """
+
+    :return: prediction in json format
+    """
+    global test_data
+
+    if (not test_data.empty):
+        pred_data = pd.DataFrame()
+        pred_data = pred_data.append(
+            {columns[0]: test_data[columns[0]].mean(), columns[1]: test_data[columns[1]].mean(),
+             columns[2]: test_data[columns[2]].mean(),
+             columns[3]: test_data[columns[3]].mean(), columns[4]: test_data[columns[4]].mean(),
+             columns[5]: test_data[columns[5]].mean(),
+             columns[6]: test_data[columns[6]].mean(), columns[7]: test_data[columns[7]].mean()}, ignore_index=True)
+
+        pred_data = pred_data[columns]
+        prediction = model.predict(pred_data)
+
+        print(prediction)
+    else:
+        prediction = "No data available"
+
+    return jsonify(prediction=prediction)
 
 
 # POST REQUEST
@@ -109,33 +131,29 @@ def getData():
     """
     retrieves data from server
     """
-    global currentMean
+    global current_mean
 
     # converts byte literal to string and processes it
     current = request.get_data().decode("utf-8")
     if current:
-        processData(current)
-        currentMean = current
+        process_data(current)
+        current_mean = current
 
-    return("Data Posted")
-
-
-'''return jsonify({"prediction": list(map(int, prediction))})'''
+    return ("Data Posted")
 
 
 # GET REQUEST
 @app.route("/getAllLabels")
 def getAllLabels():
     """
-    :return: all unique labels as an array
+    :return: all unique labels arranged alphabetically
     """
-    allLabels = db_setup.allLabels()
-    allLabels = json.dumps(allLabels)
+    all_labels = db_setup.all_labels()
+    all_labels = json.dumps(all_labels)
 
-    print(allLabels)
-    db_setup.closeDB()
+    print(all_labels)
 
-    return allLabels
+    return all_labels
 
 
 # POST REQUEST
@@ -144,30 +162,24 @@ def postLabel():
     """
     gets the label the user inputted as a json value
     """
-    global currentLabel
+    global sample_label
 
-    labelJSON = request.get_json()
-    labelString = str(labelJSON["label"])
+    label_json = request.get_json()
+    label_string = str(label_json["label"])
 
-    if (len(labelString) == 0):
+    if (len(label_string) == 0):
         return jsonify({"error': 'invalid input"})
 
     getAllLabels()
 
-    if (labelString != currentLabel):
-        currentLabel = labelString
+    if (sample_label != label_string):
+        sample_label = label_string
 
-    print("Label Received: [" + labelString + "]")
-    return (labelString + "is currently plugged in")
+    print("Label Received: [" + label_string + "]")
+    return (label_string + "is currently plugged in")
 
 
-def insertData(sampling):
-    """
-    inserts data into MySQL table
-    """
-    global currentMean
-    db_setup.initDB()
-
+def get_features():
     mean = np.mean(sampling)
     median = np.median(sampling)
     sd = np.std(sampling)
@@ -177,21 +189,70 @@ def insertData(sampling):
     min = np.min(sampling)
     max = np.max(sampling)
 
-    request = "INSERT INTO {0} (label, mean, median, sd, variance, iqr, mode, min, max) " \
-              "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)".format(db_setup.tableName)
-    values = (
-    currentLabel, float(mean), float(median), float(sd), float(variance), float(iqr), float(mode), float(min),
-    float(max))
+    features = dict()
+    features[columns[0]] = float(mean)
+    features[columns[1]] = float(median)
+    features[columns[2]] = float(sd)
+    features[columns[3]] = float(variance)
+    features[columns[4]] = float(iqr)
+    features[columns[5]] = float(mode)
+    features[columns[6]] = float(min)
+    features[columns[7]] = float(max)
 
-    print(currentLabel)
+    return features
+
+
+def process_sample():
+    global test_data
+    global sampling
+
+    features = get_features()
+
+    if sample_label != "":
+        insert_data(features)
+
+    test_data = test_data.append(
+        {'mean': features['mean'], 'median': features['median'], 'sd': features['sd'], 'variance': features['variance'],
+         'iqr': features['iqr'], 'mode': features['mode'], 'min': features['min'], 'max': features['max']},
+        ignore_index=True)
+
+    print(test_data)
+    sampling = []
+
+
+def insert_data(features):
+    """
+    inserts data into MySQL table
+    """
+    global test_data
+    db_setup.init_db()
+
+    request = "INSERT INTO {0} (label, mean, median, sd, variance, iqr, mode, min, max) " \
+              "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)".format(db_setup.table_name)
+    values = (
+        sample_label, features[columns[0]], features[columns[1]], features[columns[2]], features[columns[3]],
+        features[columns[4]],
+        features[columns[5]], features[columns[6]], features[columns[7]])
+
+    print(sample_label)
+
     db_setup.cursor.execute(request, values)
 
     db_setup.db.commit()
-    db_setup.closeDB()
+    db_setup.close_db()
+
+    model.train()
+    test_data = pd.DataFrame(columns=model.get_columns())
 
 
 if __name__ == '__main__':
-    # socketio.run(app, host='0.0.0.0', port=5000)
     getAllLabels()
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    model.load_models()
+
+    model.load_data()
+    model.prepare_data()
+
+    app.run(host='0.0.0.0', port=5000, debug=True, threaded=True)
+
+    # model.save_models()
     print("Server Closed")

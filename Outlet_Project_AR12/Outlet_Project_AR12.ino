@@ -7,7 +7,7 @@
 BridgeClient client;
 BridgeServer toggle;
 
-char server[] = "192.168.0.4";
+char server[] = "192.168.0.6";
 
 String serverStr;
 String command;
@@ -19,7 +19,7 @@ double voltage;
 double VRMS;
 double ampsRMS;
 double current;
-
+ 
 unsigned long lastMillis = 0;
 unsigned int currentMillis = 0;
 long interval = 1000;

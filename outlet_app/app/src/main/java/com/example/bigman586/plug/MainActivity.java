@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
         series = new LineGraphSeries<DataPoint>();
         graph.addSeries(series);
 
-        // customize a little bit viewport
+        // customize viewport
         Viewport viewport = graph.getViewport();
         viewport.setYAxisBoundsManual(true);
         viewport.setMinY(0);
@@ -126,6 +126,9 @@ public class MainActivity extends AppCompatActivity {
         ViewGroup.LayoutParams params = viewPager.getLayoutParams();
         params.height = height/3;
         viewPager.setLayoutParams(params);
+
+        NetworkSniffTask test = new NetworkSniffTask(MainActivity.this.getApplicationContext());
+        test.doInBackground();
     }
 
     private final int SECONDS = 1000;
@@ -143,9 +146,10 @@ public class MainActivity extends AppCompatActivity {
         }, SECONDS);
     }
 
-    // add random data to graph
+    /**
+     * add random data to graph
+     */
     private void updateMean() {
-        // here, we choose to display max 10 points on the viewport and we scroll to end
         ConnectToServer service = RetrofitInstance.getRetrofitInstance().create(ConnectToServer.class);
 
         Call<String> call = service.getMean();
@@ -203,6 +207,9 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * sends command to server
+     */
     public void sendCommand(){
 
         JsonObject jsonObj = new JsonObject();

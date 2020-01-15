@@ -1,121 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
-        <link rel="stylesheet" text="text/css" href= "{{ url_for('static',filename='stylesheets/style.css') }}">
-<head>
-    <meta charset="UTF-8">
-    <title>Plug</title>
-    <script type="text/javascript"
-            src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js">
-    </script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
-    <script type = "text/javascript">
-    var data = [0, 1, 2, 3, 4, 5, 6, 7, 20, 25, 50];
-    setInterval(function(){
-        $.ajax({
-			url: '/getStatus',
-			type: 'GET',
-			success: function(response){
-				console.log(response);
-                $("#stateText").html(response.toUpperCase());
-			},
-			error: function(error){
-				console.log(error);
-			}
-		}, 5000);
-	});
-	setInterval(function(){
-        $.ajax({
-			url: '/getLabel',
-			type: 'GET',
-			success: function(response){
-				console.log(response);
-                $("#labelText").html(response);
-			},
-			error: function(error){
-				console.log(error);
-			}
-		}, 5000);
-	});
-	setInterval(function(){
-        $.ajax({
-			url: '/getMean',
-			type: 'GET',
-			success: function(response){
-				console.log(response);
-                $("#currentText").html(response + " A");
-                data.push(parseFloat(response));
-                data.shift();
-			},
-			error: function(error){
-				console.log(error);
-			}
-		}, 5000);
-	});
+    <link rel="stylesheet" text="text/css" href= "{{ url_for('static',filename='stylesheets/style.css') }}">
+    <head>
+        <meta charset="UTF-8">
+        <title>Plug</title>
+        <script type="text/javascript"
+                src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js">
+        </script>
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+        <script type = "text/javascript">
+            setInterval(function(){
+                $.ajax({
+                    url: '/getStatus',
+                    type: 'GET',
+                    success: function(response){
+                        console.log(response);
+                        $("#stateText").html(response.toUpperCase());
+                    },
+                    error: function(error){
+                        console.log(error);
+                    }
+                }, 5000);
+            });
+            setInterval(function(){
+                $.ajax({
+                    url: '/getPrediction',
+                    type: 'GET',
+                    dataType:'json',
+                    success: function(response){
+                        console.log(response);
+                        var object_response = response.prediction;
+                        $("#labelText").html(object_response);
+                    },
+                    error: function(error){
+                        console.log(error);
+                    }
+                }, 5000);
+            });
+            setInterval(function(){
+                $.ajax({
+                    url: '/getMean',
+                    type: 'GET',
+                    success: function(response){
+                        console.log(response);
+                        $("#currentText").html(response + " A");
+                    },
+                    error: function(error){
+                        console.log(error);
+                    }
+                }, 5000);
+            });
+        </script>
 
-    </script>
-</head>
-<body>
+    </head>
+    <body>
 
-<div id = "container">
-    <div id = "label">
-        <h2 id = "labelText"> {{ label }} </h2>
-    </div>
-    <div id = "state">
-        <h4 id = "stateText"> {{ state }} </h4>
-    </div>
-    <p></p>
-</div>
+        <div id = "container">
+            <div id = "label">
+                <h2 id = "labelText"> {{ label }}</h2>
+            </div>
+            <div id = "state">
+                <h4 id = "stateText"> {{ state }} </h4>
+            </div>
+            <p></p>
+        </div>
 
-<div id = "current">
-        <h3 id = "currentText"> {{ mean }} A </h3>
-    </div>
-<!--<div class = "chartContainer">
-    <canvas id="chart" width="400" height="200"></canvas>
-</div> -->
+        <div id = "current">
+            <h3 id = "currentText"> {{ mean }} A </h3>
+        </div>
 
-<script>
-    var ctx = document.getElementById("chart");
-    ctx.style.backgroundColor = 'rgba(255, 2555, 255, 0.25)';
-    ctx.style.padding = '12.5px';
+        <div id="graph"></div>
+        <script>
+        function rand() {
 
-    new Chart(ctx, {
-      type: 'line',
-      data: {
-        datasets: [{
-            data: [86,114,106,106,107,111,133,221,783,2478],
-            borderColor: "#3e95cd",
-            fill: false
-          }
-        ]
-      },
-      options: {
+            const Http = new XMLHttpRequest();
+            const url='https://192.169.0.6/getMean';
+            Http.open("GET", url);
+            Http.send();
 
-      }
-    });
+            var yVal = 0;
+            Http.onreadystatechange = (e) => {
+                yVal = parseFloat(Http.responseText);
+                Console.log(yVal)
+            }
 
-    function addData(chart, label, color, data) {
-            chart.data.datasets.push({
-            label: label,
-          backgroundColor: color,
-          data: data
-        });
-        chart.update();
-    }
-
-    function httpGetAsync(theUrl, callback){
-        var xmlHttp = new XMLHttpRequest();
-        xmlHttp.onreadystatechange = function() {
-            if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
-                callback(xmlHttp.responseText);
+            return yVal;
         }
-        xmlHttp.open("GET", theUrl, true); // true for asynchronous
-        xmlHttp.send(null);
-    }
 
-    // inserting the new dataset after 3 seconds
-    setTimeout(function() {
-        addData(barChart, '# of Votes 2017', '#ff0000', [16, 14, 8]);
-    }, 3000);
-</script>
-</body>
+        var time = new Date();
+        var cnt = 0;
+
+        Plotly.plot('graph', [{
+            y: [rand()],
+            type: 'line'
+        }]);
+
+        setInterval(function(){
+               Plotly.extendTraces('graph',{y:[[rand()]]}, [0]);
+               cnt++;
+
+               if(cnt > 500){
+                    Plotly.relayout('graph', {
+                        xaxis: {
+                            range: [cnt-500, cnt]
+                        }
+                    });
+               }
+
+               }, 1000);
+
+
+
+
+        </script>
+
+    </body>
 </html>
