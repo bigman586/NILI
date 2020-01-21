@@ -7,7 +7,7 @@
 BridgeClient client;
 BridgeServer toggle;
 
-char server[] = "192.168.0.6";
+char server[] = "192.168.0.10";
 
 String serverStr;
 String command;

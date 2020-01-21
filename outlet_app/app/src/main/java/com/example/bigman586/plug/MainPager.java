@@ -6,10 +6,11 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v7.app.AppCompatActivity;
 
 public class MainPager extends AppCompatActivity {
-    public static class MyPagerAdapter extends FragmentPagerAdapter {
+    public static class PagerAdapter extends FragmentPagerAdapter {
         private static int NUM_ITEMS = 2;
 
-        public MyPagerAdapter(FragmentManager fragmentManager) {
+        public PagerAdapter(FragmentManager fragmentManager) {
+
             super(fragmentManager);
         }
 

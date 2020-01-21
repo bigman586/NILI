@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,21 +51,28 @@ public class PredictFragment extends Fragment {
                 R.layout.activity_predict, container, false);
 
         predictionView = rootView2.findViewById(R.id.prediction);
-        
-        final Handler handler = new Handler();
-        final Runnable mTicker = new Runnable() {
+
+//        final Runnable mTicker = new Runnable() {
+//            public void run() {
+//                //user interface updates on screen
+//                getPrediction();
+//                handler.postDelayed(mTicker, 1000);
+//            }
+//        };
+//        handler.postDelayed(mTicker, 1000);
+//        mTicker.run();
+
+        getActivity().runOnUiThread(new Runnable() {
             public void run() {
                 //user interface updates on screen
                 getPrediction();
+
+                Handler handler = new Handler();
+                handler.postDelayed(this, 1000);
             }
-        };
-        handler.postDelayed(mTicker, 1000);
-        mTicker.run();
-        
+        });
         return rootView2;
     }
-    
-
     /**
      * predicted name of device plugged into outlet
      */
@@ -75,17 +83,20 @@ public class PredictFragment extends Fragment {
 
         call.enqueue(new Callback<JsonObject>() {
 
+            MainPager.PagerAdapter adapter = new MainPager.PagerAdapter(((FragmentActivity) getContext()).getSupportFragmentManager());
+            Fragment fragment = adapter.getItem(1);
+
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                System.out.println(response.body());
-                JsonObject predictionJSON = response.body();
+                    System.out.println(response.body());
+                    JsonObject predictionJSON = response.body();
 
-                //changes the prediction text
-                assert predictionJSON != null;
-                String predictionString = String.format("%s", predictionJSON.get("prediction").toString());
+                    //changes the prediction text
+                    assert predictionJSON != null;
+                    String predictionString = String.format("%s", predictionJSON.get("prediction").toString());
 
-                predictionString = predictionString.replace("\"", "");
-                predictionView.setText(predictionString);
+                    predictionString = predictionString.replace("\"", "");
+                    predictionView.setText(predictionString);
             }
 
             @Override

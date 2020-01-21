@@ -33,9 +33,6 @@ def close_db():
     cursor.close()
     db.close()
 
-    db = None
-    cursor = None
-
 
 def all_labels():
 

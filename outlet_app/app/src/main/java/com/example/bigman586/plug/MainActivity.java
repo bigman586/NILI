@@ -31,7 +31,6 @@ import retrofit2.Response;
 public class MainActivity extends AppCompatActivity {
     private Switch toggle;
     private TextView on, off, currentMean;
-    TabLayout tabLayout;
     private String status;
     private double mean;
     private LineGraphSeries<DataPoint> series;
@@ -53,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
         toggle = findViewById(R.id.toggle);
 
         viewPager = findViewById(R.id.viewpager);
-        viewPager.setAdapter(new MainPager.MyPagerAdapter(getSupportFragmentManager()));
+        viewPager.setAdapter(new MainPager.PagerAdapter(getSupportFragmentManager()));
 
 /*
         tabLayout= findViewById(R.id.tab_view);

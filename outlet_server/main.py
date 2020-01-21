@@ -105,6 +105,7 @@ def getPrediction():
     :return: prediction in json format
     """
     global test_data
+    global sample_label
 
     if (not test_data.empty):
         pred_data = pd.DataFrame()
@@ -122,6 +123,7 @@ def getPrediction():
     else:
         prediction = "No data available"
 
+    sample_label = ""
     return jsonify(prediction=prediction)
 
 
@@ -247,12 +249,9 @@ def insert_data(features):
 
 if __name__ == '__main__':
     getAllLabels()
-    model.load_models()
-
     model.load_data()
     model.prepare_data()
-
+    model.load_models()
     app.run(host='0.0.0.0', port=5000, debug=True, threaded=True)
-
-    # model.save_models()
+    model.save_models()
     print("Server Closed")
