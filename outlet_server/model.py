@@ -72,7 +72,7 @@ def get_columns():
     return columns
 
 
-def cross_val(model):
+def cross_val_model(model):
     global x_train
     global y_train
     global labels
@@ -80,27 +80,31 @@ def cross_val(model):
     load_data()
     prepare_data()
 
+    return cross_val(model, x_train, y_train)
+
+
+def cross_val(model, x_train, y_train):
     start = time.time()
 
-    validationSize = 0.20
-    seed = 4
+    validation_size = 0.25
+    seed = 3
 
     x_train, x_validation, y_train, y_validation = model_selection.train_test_split(x_train, y_train,
-                                                                                    test_size=validationSize,
+                                                                                    test_size=validation_size,
                                                                                     random_state=seed)
 
     # testing options and resetting random seed
-    seed = 12
+    seed = 3
     scoring = 'accuracy'
 
-    # checks accuracy of ML method and outputs accuracy percentage dataset n_splits times
-    # scores machine learning model on the dataset
-    kfold = model_selection.KFold(n_splits=10, random_state=seed,
-                                  shuffle=True)  # n_splits - 1 datasets for training, 1 for validation
-    #cvResults = model_selection.cross_val_score(model, x_train, y_train, cv=kfold, scoring=scoring)
-
-    #print(('Mean: %s  SD: %f') % (cvResults.mean(), cvResults.std()))
-    # print(cvResults)
+    # checks accuracy of ML method and outputs accuracy percentage current_dataset n_splits times
+    # scores machine learning model on the current_dataset
+    K = 10
+    kfold = model_selection.KFold(n_splits=K, random_state=seed,
+                                  shuffle=True)
+    cv_results = model_selection.cross_val_score(model, x_train, y_train, cv=kfold, scoring=scoring)
+    # print(('Mean: %s  SD: %f') % (cv_results.mean(), cv_results.std()))
+    # print(cv_results)
 
     # fit training data into decision Tree
     model.fit(x_train, y_train)
@@ -109,18 +113,19 @@ def cross_val(model):
     # get predictions from machine learning model
     predictions = model.predict(x_validation)
 
-    # check how accurate the model is using the predictions
-    accuracy = accuracy_score(y_validation, predictions, normalize=True)
-
     label_prediction = []
     y_val = []
 
     for i in range(len(predictions)):
         if predictions[i].any():
-             label_prediction.append(decode(predictions[i]))
+            label_prediction.append(decode(predictions[i]))
 
             # iloc for integer-location based indexing
-             y_val.append(y_validation.iloc[i][y_validation.iloc[i] == 1].index[0])
+            y_val.append(y_validation.iloc[i][y_validation.iloc[i] == 1].index[0])
+
+    # check how accurate the model is using the predictions
+    accuracy = accuracy_score(y_val, label_prediction, normalize=True)
+
     # print(y_val)
     # print(label_prediction)
 
@@ -129,7 +134,7 @@ def cross_val(model):
 
     # confusion matrix
     confusion_mat = confusion_matrix(y_val, label_prediction)
-    return (accuracy, confusion_mat)
+    return (accuracy, confusion_mat, cv_results)
 
 
 def train():
@@ -157,7 +162,7 @@ def decode(prediction):
         result = (np.where(prediction == 1))[0]
         result = result[0]
 
-        #print(result)
+        # print(result)
         result_text = db_setup.all_labels()[result]
 
     db_setup.close_db()

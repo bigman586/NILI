@@ -8,11 +8,11 @@ from scipy import stats
 app = Flask(__name__)
 db_setup.init_db()
 
-sample_label = ""
+dataset_label = ""
 state = False
-current_mean = 0
+current_reading = 0
 
-sampling = []
+current_dataset = []
 columns = model.get_columns()
 test_data = pd.DataFrame(columns=columns)
 
@@ -25,19 +25,19 @@ def home():
     """
     root directory of  server
     """
-    return render_template('index.html', current=current_mean, label=sample_label, status=state)
+    return render_template('index.html', current=current_reading, label=dataset_label, status=state)
 
 
 @app.route('/getMean')
 def getMean():
-    global current_mean
-    return str(current_mean)
+    global current_reading
+    return str(current_reading)
 
 
 @app.route('/getLabel')
 def getLabel():
-    global sample_label
-    return str(sample_label)
+    global dataset_label
+    return str(dataset_label)
 
 
 @app.route('/getStatus')
@@ -82,19 +82,19 @@ def process_data(current):
     :param current: float of current value
     :return:
     """
-    global sampling
+    global current_dataset
 
     interval = 10
 
-    if (len(sampling) < interval):
-        sampling.append(current)
+    if (len(current_dataset) < interval):
+        current_dataset.append(current)
         # print(current)
     else:
-        print(sampling)
-        sampling = np.array(sampling)
-        sampling = sampling.astype(float)
+        print(current_dataset)
+        current_dataset = np.array(current_dataset)
+        current_dataset = current_dataset.astype(float)
 
-        process_sample()
+        process_dataset()
         return ("Saved Sampling")
 
 
@@ -105,7 +105,7 @@ def getPrediction():
     :return: prediction in json format
     """
     global test_data
-    global sample_label
+    global dataset_label
 
     if (not test_data.empty):
         pred_data = pd.DataFrame()
@@ -123,7 +123,7 @@ def getPrediction():
     else:
         prediction = "No data available"
 
-    sample_label = ""
+    dataset_label = ""
     return jsonify(prediction=prediction)
 
 
@@ -133,13 +133,13 @@ def getData():
     """
     retrieves data from server
     """
-    global current_mean
+    global current_reading
 
     # converts byte literal to string and processes it
     current = request.get_data().decode("utf-8")
     if current:
         process_data(current)
-        current_mean = current
+        current_reading = current
 
     return ("Data Posted")
 
@@ -164,7 +164,7 @@ def postLabel():
     """
     gets the label the user inputted as a json value
     """
-    global sample_label
+    global dataset_label
 
     label_json = request.get_json()
     label_string = str(label_json["label"])
@@ -174,22 +174,22 @@ def postLabel():
 
     getAllLabels()
 
-    if (sample_label != label_string):
-        sample_label = label_string
+    if (dataset_label != label_string):
+        dataset_label = label_string
 
     print("Label Received: [" + label_string + "]")
     return (label_string + "is currently plugged in")
 
 
 def get_features():
-    mean = np.mean(sampling)
-    median = np.median(sampling)
-    sd = np.std(sampling)
-    variance = np.var(sampling)
-    iqr = np.subtract(*np.percentile(sampling, [75, 25]))
-    mode = stats.mode(sampling)[0]
-    min = np.min(sampling)
-    max = np.max(sampling)
+    mean = np.mean(current_dataset)
+    median = np.median(current_dataset)
+    sd = np.std(current_dataset)
+    variance = np.var(current_dataset)
+    iqr = np.subtract(*np.percentile(current_dataset, [75, 25]))
+    mode = stats.mode(current_dataset)[0]
+    min = np.min(current_dataset)
+    max = np.max(current_dataset)
 
     features = dict()
     features[columns[0]] = float(mean)
@@ -204,13 +204,13 @@ def get_features():
     return features
 
 
-def process_sample():
+def process_dataset():
     global test_data
-    global sampling
+    global current_dataset
 
     features = get_features()
 
-    if sample_label != "":
+    if dataset_label != "":
         insert_data(features)
 
     test_data = test_data.append(
@@ -219,7 +219,7 @@ def process_sample():
         ignore_index=True)
 
     print(test_data)
-    sampling = []
+    current_dataset = []
 
 
 def insert_data(features):
@@ -232,11 +232,11 @@ def insert_data(features):
     request = "INSERT INTO {0} (label, mean, median, sd, variance, iqr, mode, min, max) " \
               "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)".format(db_setup.table_name)
     values = (
-        sample_label, features[columns[0]], features[columns[1]], features[columns[2]], features[columns[3]],
+        dataset_label, features[columns[0]], features[columns[1]], features[columns[2]], features[columns[3]],
         features[columns[4]],
         features[columns[5]], features[columns[6]], features[columns[7]])
 
-    print(sample_label)
+    print(dataset_label)
 
     db_setup.cursor.execute(request, values)
 
