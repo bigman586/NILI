@@ -1,17 +1,14 @@
-import random
 import time
-import pandas as pd
-from sklearn.ensemble import VotingClassifier
-import graph
-import model
+
 import numpy as np
-import db_setup
+import pandas as pd
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.externals import joblib
-import matplotlib.pyplot as plt
-import time
+
+import db_setup
+import graph
+import model
 
 
 # Utility function to report best scores
