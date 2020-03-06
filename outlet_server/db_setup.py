@@ -1,11 +1,12 @@
+import mysql.connector as mysql
 import numpy as np
 
-import mysql.connector as mysql
+import config
 
 db = None
 cursor = None
 
-db_name = "outlet_data"
+db_name = config.DB_NAME
 table_name = "%s.data" % db_name
 statement = "SELECT * FROM %s" % table_name
 

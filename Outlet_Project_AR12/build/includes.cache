@@ -1,0 +1,72 @@
+[
+  {
+    "Sourcefile": "",
+    "Include": "",
+    "Includepath": "/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/cores/arduino"
+  },
+  {
+    "Sourcefile": "",
+    "Include": "",
+    "Includepath": "/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/variants/mega"
+  },
+  {
+    "Sourcefile": "/Users/Bigman586/Documents/GitHub/NILI/Outlet_Project_AR12/build/sketch/Outlet_Project_AR12.ino.cpp",
+    "Include": "Bridge.h",
+    "Includepath": "/Applications/Arduino.app/Contents/Java/libraries/Bridge/src"
+  },
+  {
+    "Sourcefile": "/Users/Bigman586/Documents/GitHub/NILI/Outlet_Project_AR12/build/sketch/Outlet_Project_AR12.ino.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "/Applications/Arduino.app/Contents/Java/libraries/Bridge/src/Bridge.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "/Applications/Arduino.app/Contents/Java/libraries/Bridge/src/BridgeClient.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "/Applications/Arduino.app/Contents/Java/libraries/Bridge/src/BridgeSSLClient.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "/Applications/Arduino.app/Contents/Java/libraries/Bridge/src/BridgeServer.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "/Applications/Arduino.app/Contents/Java/libraries/Bridge/src/BridgeUdp.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "/Applications/Arduino.app/Contents/Java/libraries/Bridge/src/Console.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "/Applications/Arduino.app/Contents/Java/libraries/Bridge/src/FileIO.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "/Applications/Arduino.app/Contents/Java/libraries/Bridge/src/HttpClient.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "/Applications/Arduino.app/Contents/Java/libraries/Bridge/src/Mailbox.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "/Applications/Arduino.app/Contents/Java/libraries/Bridge/src/Process.cpp",
+    "Include": "",
+    "Includepath": ""
+  }
+]

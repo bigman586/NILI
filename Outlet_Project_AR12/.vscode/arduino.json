@@ -1,0 +1,8 @@
+{
+    "board": "Dragino:avr:mega2560Yun",
+    "port": "192.168.0.13",
+    "programmer": "AVRISP mkII",
+    "sketch": "Outlet_Project_AR12.ino",
+    "output": "build",
+    "password": "c=McP(v(7@un#S(K"
+}

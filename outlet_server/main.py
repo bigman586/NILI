@@ -1,9 +1,11 @@
-from flask import Flask, request, jsonify, json, render_template
-import db_setup
-import model
 import numpy as np
 import pandas as pd
+from flask import Flask, json, jsonify, render_template, request
 from scipy import stats
+
+import config
+import db_setup
+import model
 
 app = Flask(__name__)
 db_setup.init_db()
@@ -23,19 +25,27 @@ statement = db_setup.statement
 @app.route("/")
 def home():
     """
-    root directory of  server
+    root directory of server
+
+    :return: html template page with variables et for ui elements
     """
     return render_template('index.html', current=current_reading, label=dataset_label, status=state)
 
 
 @app.route('/getMean')
 def getMean():
+    """
+    :return: electric load mean
+    """
     global current_reading
     return str(current_reading)
 
 
 @app.route('/getLabel')
 def getLabel():
+    """
+    :return: current label of dataset
+    """
     global dataset_label
     return str(dataset_label)
 
@@ -56,7 +66,7 @@ def getStatus():
 @app.route('/postCommand', methods=['POST'])
 def postCommmand():
     """
-    changes status of outlet based on info. from app
+    changes status of outlet based on information from app
     """
     global state
 
@@ -80,11 +90,10 @@ def process_data(current):
     inserts data to table
 
     :param current: float of current value
-    :return:
     """
     global current_dataset
 
-    interval = 10
+    interval = config.SAMPLING_SIZE
 
     if (len(current_dataset) < interval):
         current_dataset.append(current)
@@ -101,29 +110,31 @@ def process_data(current):
 @app.route('/getPrediction')
 def getPrediction():
     """
-
     :return: prediction in json format
     """
-    global test_data
-    global dataset_label
+    # global test_data
+    # global dataset_label
 
-    if (not test_data.empty):
-        pred_data = pd.DataFrame()
-        pred_data = pred_data.append(
-            {columns[0]: test_data[columns[0]].mean(), columns[1]: test_data[columns[1]].mean(),
-             columns[2]: test_data[columns[2]].mean(),
-             columns[3]: test_data[columns[3]].mean(), columns[4]: test_data[columns[4]].mean(),
-             columns[5]: test_data[columns[5]].mean(),
-             columns[6]: test_data[columns[6]].mean(), columns[7]: test_data[columns[7]].mean()}, ignore_index=True)
+    # if (not test_data.empty):
+    #     pred_data = pd.DataFrame()
+    #     pred_data = pred_data.append(
+    #         {columns[0]: test_data[columns[0]].mean(), columns[1]: test_data[columns[1]].mean(),
+    #          columns[2]: test_data[columns[2]].mean(),
+    #          columns[3]: test_data[columns[3]].mean(), columns[4]: test_data[columns[4]].mean(),
+    #          columns[5]: test_data[columns[5]].mean(),
+    #          columns[6]: test_data[columns[6]].mean(), columns[7]: test_data[columns[7]].mean()}, ignore_index=True)
 
-        pred_data = pred_data[columns]
-        prediction = model.predict(pred_data)
+    #     pred_data = pred_data[columns]
+    #     prediction = model.predict(pred_data)
 
-        print(prediction)
-    else:
-        prediction = "No data available"
+    #     print(prediction)
+    # else:
+    #     prediction = "No data available"
 
-    dataset_label = ""
+    # dataset_label = ""
+    letters = string.ascii_lowercase
+    prediction = ''.join(random.choice(letters) for i in range(stringLength))
+
     return jsonify(prediction=prediction)
 
 
@@ -163,6 +174,8 @@ def getAllLabels():
 def postLabel():
     """
     gets the label the user inputted as a json value
+
+    :return: string that states device plugged in
     """
     global dataset_label
 
@@ -224,7 +237,9 @@ def process_dataset():
 
 def insert_data(features):
     """
-    inserts data into MySQL table
+    :param features: dictionary of features calculated for dataset
+    
+    inserts data into MySQL table with calculated
     """
     global test_data
     db_setup.init_db()
@@ -252,6 +267,7 @@ if __name__ == '__main__':
     model.load_data()
     model.prepare_data()
     model.load_models()
-    app.run(host='0.0.0.0', port=5000, debug=True, threaded=True)
+
+    app.run(host=config.HOST_ADDRESS, port=config.HOST_PORT, debug=config.DEBUG, threaded=True)
     model.save_models()
     print("Server Closed")

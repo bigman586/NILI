@@ -1,14 +1,13 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import matplotlib.colors as mcolors
 
 plt.rc('font', weight='bold')
 BAR_YLABEL = 'Accuracy (%)'
 BAR_XLABEL = 'Classifier'
-FONT_SIZE = 20
+
 
 def graph_bar(names, values):
-    plt.title('General Classifier accuracy', fontsize=FONT_SIZE)
+    plt.title('General Classifier accuracy', fontsize=config.FONT_SIZE)
 
     plt.xlabel(BAR_XLABEL, size=10)
     plt.ylabel(BAR_YLABEL, size=12.5)
@@ -16,7 +15,7 @@ def graph_bar(names, values):
     ind = np.arange(len(names))
 
     plt.xticks(ind, names)
-    plt.yticks(np.arange(0, 100, 10))
+    plt.yticks(np.arange(0, 110, 10))
 
     plt.bar(np.arange(len(values)), values)
 
@@ -24,37 +23,34 @@ def graph_bar(names, values):
     show_graph()
 
 
-# def graph_group_bar(names, first_bar, second_bar):
-#     N = len(names)
-#
-#     first_bar = (20, 35, 30, 35, 27)
-#     second_bar = (25, 32, 34, 20, 25)
-#
-#     ind = np.arange(N)
-#     width = 0.35
-#
-#     plt.bar(ind, first_bar, width, label='DT')
-#     plt.bar(ind + width, second_bar, width,
-#             label='KNN')
-#
-#     plt.xlabel(BAR_XLABEL)
-#     plt.ylabel(BAR_YLABEL)
-#     plt.title('General Classifier accuracy')
-#
-#     plt.xticks(ind + width / 2, names)
-#     plt.yticks(np.arange(0, 1.1, 0.1))
-#
-#     plt.legend(loc='best')
-#     plt.savefig("Bar graph")
-#
-#     show_graph()
+def graph_group_bar(names, first_bar, second_bar, title):
+    N = len(names)
+
+    ind = np.arange(N)
+    width = 0.35
+
+    plt.bar(ind, first_bar, width, label='DT', color='grey')
+    plt.bar(ind + width, second_bar, width, label='KNN', color='#0057c9')
+
+    plt.xlabel("Appliance",  fontsize=15)
+    plt.ylabel(BAR_YLABEL,  fontsize=15)
+    plt.title(title)
+
+    plt.xticks(ind + width / 2, names)
+    plt.yticks(np.arange(0, 110, 10))
+
+    plt.legend(loc='best')
+    plt.savefig("Bar graph")
+
+    show_graph()
 
 
 def graph_table(table, columns, title):
     cell_text = []
     for row in range(len(table)):
         cell_text.append(table.iloc[row])
-    table = plt.table(cellText=cell_text, colLabels=columns, loc='center', cellLoc='center')
+    table = plt.table(cellText=cell_text, colLabels=columns,
+                      loc='center', cellLoc='center')
 
     for i in range(len(columns)):
         table[(0, i)].set_facecolor("#0D65D8")
@@ -65,7 +61,7 @@ def graph_table(table, columns, title):
 
     table.scale(1.25, 1.5)
     plt.axis('off')
-    plt.title(title, y=.75, fontsize=FONT_SIZE)
+    plt.title(title, y=.75, fontsize=config.FONT_SIZE)
 
     show_graph()
 
@@ -100,16 +96,17 @@ def graph_matrix(cm, title, cmap=None, labels=[], normalize=True, scale=np.arang
         if normalize:
             plt.text(j, i, "{:0.7f}".format(cm[i, j]),
                      horizontalalignment="bottom",
-                     color="white" if cm[i, j] > thresh else "black")
+                     color="white" if cm[i, j] < thresh else "black")
         else:
             plt.text(j, i, "{:,}".format(cm[i, j]),
                      horizontalalignment="center",
-                     color="white" if cm[i, j] > thresh else "black")
+                     color="white" if cm[i, j] < thresh else "black")
 
     plt.ylabel('True label')
-    plt.xlabel('Predicted label\naccuracy={:0.4f}; misclass={:0.4f}'.format(accuracy, misclass))
+    plt.xlabel('Predicted label\naccuracy={:0.4f}; misclass={:0.4f}'.format(
+        accuracy, misclass))
 
-    plt.savefig(title, fontsize=FONT_SIZE)
+    plt.savefig(title, fontsize=config.FONT_SIZE)
 
     show_graph()
 

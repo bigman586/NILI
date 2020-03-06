@@ -1,4 +1,4 @@
- #include <Bridge.h>
+#include <Bridge.h>
 #include <BridgeServer.h>
 #include <YunClient.h>
 #include <BridgeClient.h>
@@ -7,7 +7,7 @@
 BridgeClient client;
 BridgeServer toggle;
 
-char server[] = "192.168.0.10";
+char server[] = "192.168.0.7";
 
 String serverStr;
 String command;
@@ -56,11 +56,13 @@ void setup()
 void loop() 
 { 
    currentMillis = millis();
+   
    if (currentMillis - lastMillis > interval)
    { 
       lastMillis = currentMillis;
       current = calculateCurrent();
       String c = String(current,5);
+      
       String i = "AR12"; 
       data = "curr1=" + c + "&ardID=" + i;
       data = c;
@@ -107,19 +109,9 @@ void loop()
           Console.println("Turned off");
 
           // turns pin 13 & 8 off along with the rest
-          digitalWrite(13, LOW);     
-          digitalWrite(12, LOW);
-          digitalWrite(11, LOW);     
-          digitalWrite(10, LOW);
-          digitalWrite(9, LOW);     
-          digitalWrite(8, LOW);
-          digitalWrite(7, LOW);     
-          digitalWrite(6, LOW);
-          digitalWrite(5, LOW);
-          digitalWrite(4, LOW);     
-          digitalWrite(3, LOW);
-          digitalWrite(2, LOW);     
-          digitalWrite(1, LOW);
+          for (int i = 1; i <= 13; i++){
+            digitalWrite(i, LOW);
+          }
         }
         
         // turns outlet on
@@ -129,7 +121,7 @@ void loop()
           // turns pin 13 & 8 on
           digitalWrite(13, HIGH);
           digitalWrite(8, HIGH);
-        }
+        } 
 
         command = "";
         Console.flush();

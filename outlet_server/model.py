@@ -1,16 +1,15 @@
-import datetime
 import random
-
-import pandas as pd
-from sklearn.metrics import accuracy_score, confusion_matrix
-import db_setup
-from sklearn import model_selection
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.ensemble import VotingClassifier
-import numpy as np
-from sklearn.externals import joblib
 import time
+
+import numpy as np
+import pandas as pd
+from sklearn import model_selection
+from sklearn.externals import joblib
+from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.preprocessing import (Imputer, LabelEncoder, OneHotEncoder,
+                                   StandardScaler)
+
+import db_setup
 
 pd.set_option('display.max_columns', 20)
 pd.set_option('expand_frame_repr', True)
@@ -41,7 +40,8 @@ def load_data():
         if col_type == 'O':
             categoricals.append(col)
         else:
-            df[col].fillna(0, inplace=True)  # fill NA's with 0 for ints/floats, too generic
+            # fill NA's with 0 for ints/floats, too generic
+            df[col].fillna(0, inplace=True)
 
 
 def prepare_data():
@@ -49,12 +49,13 @@ def prepare_data():
     global y_train
     global categoricals
     global df
+    global y_labels
 
     x_train = df.drop(['id', 'label'], axis=1)
-    y_train = df['label']
+    y_labels = df['label']
 
     # get_dummies effectively creates one-hot encoded variables
-    y_train = pd.get_dummies(y_train, columns=categoricals, dummy_na=True)
+    y_train = pd.get_dummies(y_labels, columns=categoricals, dummy_na=True)
     y_train.drop(['NaN'], axis=1, errors='ignore')
 
 
@@ -76,6 +77,7 @@ def cross_val_model(model):
     global x_train
     global y_train
     global labels
+    global y_labels
 
     load_data()
     prepare_data()
@@ -83,15 +85,18 @@ def cross_val_model(model):
     return cross_val(model, x_train, y_train)
 
 
-def cross_val(model, x_train, y_train):
-    start = time.time()
+def cross_val(model, x_data, y_data):
 
     validation_size = 0.25
     seed = 3
 
-    x_train, x_validation, y_train, y_validation = model_selection.train_test_split(x_train, y_train,
+    x_train, x_validation, y_train, y_validation = model_selection.train_test_split(x_data, y_data,
                                                                                     test_size=validation_size,
                                                                                     random_state=seed)
+    # print(x_train.shape)
+    # print(x_validation.shape)
+    # print(y_train.shape)
+    # print(y_validation.shape)
 
     # testing options and resetting random seed
     seed = 3
@@ -100,18 +105,22 @@ def cross_val(model, x_train, y_train):
     # checks accuracy of ML method and outputs accuracy percentage current_dataset n_splits times
     # scores machine learning model on the current_dataset
     K = 10
-    kfold = model_selection.KFold(n_splits=K, random_state=seed,
-                                  shuffle=True)
-    cv_results = model_selection.cross_val_score(model, x_train, y_train, cv=kfold, scoring=scoring)
+    kfold = model_selection.KFold(n_splits=K, random_state=seed, shuffle=True)
+    cv_results = model_selection.cross_val_score(
+        model, x_train, y_train, cv=kfold, scoring=scoring)
+
     # print(('Mean: %s  SD: %f') % (cv_results.mean(), cv_results.std()))
     # print(cv_results)
+    start = time.time()
 
-    # fit training data into decision Tree
+    # fit training data into classifier
     model.fit(x_train, y_train)
     print("Trained in " + str(time.time() - start) + " seconds")
 
     # get predictions from machine learning model
     predictions = model.predict(x_validation)
+    print(predictions)
+    # # print(y_train)
 
     label_prediction = []
     y_val = []
@@ -121,7 +130,8 @@ def cross_val(model, x_train, y_train):
             label_prediction.append(decode(predictions[i]))
 
             # iloc for integer-location based indexing
-            y_val.append(y_validation.iloc[i][y_validation.iloc[i] == 1].index[0])
+            y_val.append(y_validation.iloc[i]
+                         [y_validation.iloc[i] == 1].index[0])
 
     # check how accurate the model is using the predictions
     accuracy = accuracy_score(y_val, label_prediction, normalize=True)
@@ -137,6 +147,73 @@ def cross_val(model, x_train, y_train):
     return (accuracy, confusion_mat, cv_results)
 
 
+def accuracy_by_class(model, x_data, y_data):
+    global x_train
+    global y_train
+
+    x_validation = x_data
+    y_validation = y_data
+
+    # testing options and resetting random seed
+    seed = 3
+    scoring = 'accuracy'
+
+    # checks accuracy of ML method and outputs accuracy percentage current_dataset n_splits times
+    # scores machine learning model on the current_dataset
+    K = 10
+    kfold = model_selection.KFold(n_splits=K, random_state=seed,
+                                  shuffle=True)
+    start = time.time()
+
+    # fit training data into classifier
+    model.fit(x_train, y_train)
+    print("Trained in " + str(time.time() - start) + " seconds")
+
+    # get predictions from machine learning model
+    predictions = model.predict(x_validation)
+    # print(predictions)
+    # # print(y_train)
+
+    label_prediction = []
+    y_val = []
+
+    for i in range(len(predictions)):
+        if predictions[i].any():
+            label_prediction.append(decode(predictions[i]))
+
+            # iloc for integer-location based indexing
+            y_val.append(y_validation.iloc[i]
+                         [y_validation.iloc[i] == 1].index[0])
+
+    # print(y_val)
+    # print(label_prediction)
+
+    # check how accurate the model is using the predictions
+    accuracy = accuracy_score(y_val, label_prediction, normalize=True)
+
+    # print("Accuracy = " + str(accuracy))
+    # print("")
+
+    # confusion matrix
+    confusion_mat = confusion_matrix(y_val, label_prediction)
+    return accuracy
+
+
+def decode_predictions(predictions):
+    label_prediction = []
+    y_val = []
+
+    for i in range(len(predictions)):
+        if predictions[i].any():
+            label_prediction.append(decode(predictions[i]))
+
+            # iloc for integer-location based indexing
+            y_val.append(y_validation.iloc[i]
+                         [y_validation.iloc[i] == 1].index[0])
+
+    return label_predictions, y_val
+
+
 def train():
     global dt
     global knn
@@ -149,7 +226,7 @@ def train():
 
     dt.fit(x_train, y_train)
     knn.fit(x_train, y_train)
-
+    
     print("Trained in " + str(time.time() - start) + " seconds")
 
 
@@ -224,5 +301,3 @@ def save_models():
         print("Models Saved")
     else:
         return "Can't save model"
-
-# TODO: Add Cross Validation

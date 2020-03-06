@@ -1,0 +1,23 @@
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "includePath": [
+                "/Users/Bigman586/Library/Arduino15/packages/Dragino/hardware/avr/0.1.0/**",
+                "/Users/Bigman586/Library/Arduino15/packages/Dragino/hardware/avr/0.1.0/boards.txt"
+            ],
+            "forcedInclude": [],
+            "macFrameworkPath": [
+                "/System/Library/Frameworks",
+                "/Library/Frameworks"
+            ],
+            "intelliSenseMode": "clang-x64",
+            "browse": {
+                "path": ["${workspaceFolder}/build/libraries"],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+              }
+        }
+    ],
+    "version": 4
+}

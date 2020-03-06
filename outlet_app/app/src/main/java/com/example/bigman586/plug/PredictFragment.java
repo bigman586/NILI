@@ -61,16 +61,20 @@ public class PredictFragment extends Fragment {
 //        };
 //        handler.postDelayed(mTicker, 1000);
 //        mTicker.run();
+//
+//        getActivity().runOnUiThread(new Runnable() {
+//            public void run() {
+//                //user interface updates on screen
+//                getPrediction();
+//
+//                Handler handler = new Handler();
+//                handler.postDelayed(this, 1000);
+//            }
+//        });
+        if (isAdded()) {
+            getPrediction();
+        }
 
-        getActivity().runOnUiThread(new Runnable() {
-            public void run() {
-                //user interface updates on screen
-                getPrediction();
-
-                Handler handler = new Handler();
-                handler.postDelayed(this, 1000);
-            }
-        });
         return rootView2;
     }
     /**
