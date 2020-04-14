@@ -36,6 +36,9 @@ def close_db():
 
 
 def all_labels():
+    """
+    :return: all unique labels arranged alphabetically
+    """
 
     init_db()
     cursor.execute("SELECT DISTINCT label FROM %s" % table_name)
@@ -46,6 +49,7 @@ def all_labels():
     for name in columns:
         labels.append(name[0])
 
+    # arrange labels alphabetically
     labels.sort()
 
     close_db()

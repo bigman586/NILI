@@ -8,7 +8,6 @@ BAR_XLABEL = 'Classifier'
 
 def graph_bar(names, values):
     plt.title('General Classifier accuracy', fontsize=config.FONT_SIZE)
-
     plt.xlabel(BAR_XLABEL, size=10)
     plt.ylabel(BAR_YLABEL, size=12.5)
 

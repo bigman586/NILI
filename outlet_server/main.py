@@ -66,7 +66,7 @@ def getStatus():
 @app.route('/postCommand', methods=['POST'])
 def postCommmand():
     """
-    changes status of outlet based on information from app
+    changes status of outlet based on command from app
     """
     global state
 
@@ -112,28 +112,26 @@ def getPrediction():
     """
     :return: prediction in json format
     """
-    # global test_data
-    # global dataset_label
+    global test_data
+    global dataset_label
 
-    # if (not test_data.empty):
-    #     pred_data = pd.DataFrame()
-    #     pred_data = pred_data.append(
-    #         {columns[0]: test_data[columns[0]].mean(), columns[1]: test_data[columns[1]].mean(),
-    #          columns[2]: test_data[columns[2]].mean(),
-    #          columns[3]: test_data[columns[3]].mean(), columns[4]: test_data[columns[4]].mean(),
-    #          columns[5]: test_data[columns[5]].mean(),
-    #          columns[6]: test_data[columns[6]].mean(), columns[7]: test_data[columns[7]].mean()}, ignore_index=True)
+    if (not test_data.empty):
+        pred_data = pd.DataFrame()
+        pred_data = pred_data.append(
+            {columns[0]: test_data[columns[0]].mean(), columns[1]: test_data[columns[1]].mean(),
+             columns[2]: test_data[columns[2]].mean(),
+             columns[3]: test_data[columns[3]].mean(), columns[4]: test_data[columns[4]].mean(),
+             columns[5]: test_data[columns[5]].mean(),
+             columns[6]: test_data[columns[6]].mean(), columns[7]: test_data[columns[7]].mean()}, ignore_index=True)
 
-    #     pred_data = pred_data[columns]
-    #     prediction = model.predict(pred_data)
+        pred_data = pred_data[columns]
+        prediction = model.predict(pred_data)
 
-    #     print(prediction)
-    # else:
-    #     prediction = "No data available"
+        print(prediction)
+    else:
+        prediction = "No data available"
 
-    # dataset_label = ""
-    letters = string.ascii_lowercase
-    prediction = ''.join(random.choice(letters) for i in range(stringLength))
+    dataset_label = ""
 
     return jsonify(prediction=prediction)
 
@@ -195,6 +193,10 @@ def postLabel():
 
 
 def get_features():
+    """
+    :return: dictionary of features calculated from current_dataset
+    """
+
     mean = np.mean(current_dataset)
     median = np.median(current_dataset)
     sd = np.std(current_dataset)
@@ -218,6 +220,10 @@ def get_features():
 
 
 def process_dataset():
+    """
+    calculates features for current dataset
+    """
+
     global test_data
     global current_dataset
 
@@ -268,6 +274,6 @@ if __name__ == '__main__':
     model.prepare_data()
     model.load_models()
 
-    app.run(host=config.HOST_ADDRESS, port=config.HOST_PORT, debug=config.DEBUG, threaded=True)
+    app.run(host=config.HOST_ADDRESS, port=config.HOST_PORT, debug=config.DEBUG, threaded=config.THREADED)
     model.save_models()
     print("Server Closed")
